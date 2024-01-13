@@ -8,7 +8,7 @@ This repository aims to show a little of the Applied Artificial Intelligence (AI
  * **Course:** Artificial intelligence for robotics
  * **Author:** Alaf D. N. SANTOS
  * **License**: [MIT](LICENSE)
- * **Year:** 2023
+ * **Year:** 2024
 
 ### How to compile and execute it?
 [TODO]

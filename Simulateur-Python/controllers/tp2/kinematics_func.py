@@ -1,17 +1,24 @@
+'''
+Developed by Alaf DO NASCIMENTO SANTOS in the context of the Artificial Intelligence for Robotics course. Master SETI.
+
+kinematicsFunctions class - This class helps in computing the robot kinematics parameters
+'''
+
 import numpy as np
 import math
 
 class kinematicsFunctions():
-    def __init__(self, x=-0.5, y=0.125, orientation=0):
+    def __init__(self, radius=2.1 * 1e-2, track=10.8 * 1e-2, x=0.125, y=-0.5, orientation=0):
         # Initial Pose
         self.robot_pose = {'x': x, 'y': y, 'theta': orientation}
 
         # Physical information of the robot
-        self.wheel_radius = 2.1 * 1e-2
-        self.track_width = 10.8 * 1e-2
+        self.wheel_radius = radius # empirical value
+        self.track_width = track # empirical value
         
-        # Trajectory variable
-        self.path = {'x': [], 'y': []}
+        # Trajectory variables
+        self.x_list = []
+        self.y_list = []
 
         # Labyrinth trajectory
         self.labyrinth_trajectory = [
@@ -29,7 +36,6 @@ class kinematicsFunctions():
             {'x': -0.500, 'y': 0.125}
         ]
 
-
     def get_displacements(self, left_wheel_speed, right_wheel_speed, dt):
         # Convert wheel speeds from rad/s to m/s
         right_wheel_speed_m = self.wheel_radius * right_wheel_speed
@@ -40,60 +46,45 @@ class kinematicsFunctions():
         left_wheel_displacement = left_wheel_speed_m * dt
 
         # Calculate longitudinal displacement
-        linear_displacement = (left_wheel_displacement + right_wheel_displacement) / 2
+        linear_displacement = (right_wheel_displacement + left_wheel_displacement) / 2
 
         # Calculate rotational displacement
-        angular_displacement = (left_wheel_displacement - right_wheel_displacement) / self.track_width
+        angular_displacement = (right_wheel_displacement - left_wheel_displacement) / self.track_width
         
         return linear_displacement, angular_displacement
-    
 
-    def get_pose(self):
-        return self.robot_pose
 
     def get_new_pose(self, left_wheel_speed, right_wheel_speed, dt):
         # Calculate linear and angular displacements
-        linear_displacement, angular_displacement = self.get_displacements(left_wheel_speed, right_wheel_speed, dt)
+        linear_displacement, delta_theta = self.get_displacements(left_wheel_speed, right_wheel_speed, dt)
 
-        # Update robot pose based on wheel speeds
-        delta_theta = angular_displacement * dt
-
-        self.robot_pose['x'] += linear_displacement * np.cos(self.robot_pose['theta'] + delta_theta/2)
-        self.robot_pose['y'] += linear_displacement * np.sin(self.robot_pose['theta'] + delta_theta/2)
+        self.robot_pose['x'] += linear_displacement * np.sin(self.robot_pose['theta'] + delta_theta/2)
+        self.robot_pose['y'] += linear_displacement * np.cos(self.robot_pose['theta'] + delta_theta/2)
         self.robot_pose['theta'] += delta_theta
 
         # Update traveled path
-        self.path['x'].append(self.robot_pose['x'])
-        self.path['y'].append(self.robot_pose['y'])
+        self.x_list.append(-100*self.robot_pose['x'])
+        self.y_list.append(100*self.robot_pose['y'])
 
         return self.robot_pose
-    
-    def get_path(self):
-        return self.path   
 
     def angle_between_vectors(self, p1, p2):
         # Separete the values
         x1, y1 = p1[0], p1[1]
         x2, y2 = p2[0], p2[1]
 
-        # dot_product = x1 * x2 + y1 * y2
-        # magnitude_v1 = np.sqrt(x1**2 + y1**2)
-        # magnitude_v2 = np.sqrt(x2**2 + y2**2)
-        # cosine_theta = dot_product / (magnitude_v1 * magnitude_v2)
-        # theta_rad = np.arccos(cosine_theta)
-
         theta_rad = math.atan2(y2 - y1, x2 - x1)
 
         return theta_rad
 
     def rotation_matrix(self, angle):
+        # Computing the rotation matrix
         rotation_mat = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
         return rotation_mat
     
     def rotate(self, angle):
         # 2D rotation matrix
         rotation_matrix = self.rotation_matrix(angle)
-        print("Rotation matrix: \n", rotation_matrix)
         
         # Position vector
         position_vector = np.array([[self.robot_pose['x']], [self.robot_pose['y']]])
@@ -104,14 +95,30 @@ class kinematicsFunctions():
         # Updating pose
         self.robot_pose['x'] = rotated_vector[0][0]
         self.robot_pose['y'] = rotated_vector[1][0]
-        self.robot_pose['theta'] += math.degrees(angle)
+        self.robot_pose['theta'] += np.degrees(angle)
 
     def translate(self, p1, p2):
         # Finding the distance p2-p1
-        distance = math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
+        distance = np.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
 
         # Translation
-        self.robot_pose['x'] += distance * math.cos(math.radians(self.robot_pose['theta']))
-        self.robot_pose['y'] += distance * math.sin(math.radians(self.robot_pose['theta']))
+        self.robot_pose['x'] += distance * np.cos(np.radians(self.robot_pose['theta']))
+        self.robot_pose['y'] += distance * np.sin(np.radians(self.robot_pose['theta']))
+
+    # Get labyrinth_trajectory parameter
+    def get_labyrinth_trajectory(self):
+        return self.labyrinth_trajectory
+    
+    # Get robot_pose parameter
+    def get_pose(self):
+        return self.robot_pose
+
+    # Get x_list parameter
+    def get_x_list(self):
+        return self.x_list
+
+    # Get y_list parameter
+    def get_y_list(self):
+        return self.y_list   
 
         

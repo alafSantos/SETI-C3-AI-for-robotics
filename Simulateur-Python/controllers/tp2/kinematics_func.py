@@ -24,7 +24,7 @@ class kinematicsFunctions():
         self.labyrinth_trajectory = [
             {'x': -0.500, 'y': 0.125},
             {'x': -0.150, 'y': 0.125},
-            {'x': -0.150, 'y': 0.574},
+            {'x': -0.150, 'y': 0.900},
             {'x': 0.574, 'y': 0.574},
             {'x': 0.584, 'y': 0.409},
             {'x': 0.187, 'y': 0.402},
@@ -66,7 +66,7 @@ class kinematicsFunctions():
         self.x_list.append(-100*self.robot_pose['x'])
         self.y_list.append(100*self.robot_pose['y'])
 
-        return self.robot_pose
+        return linear_displacement, self.robot_pose
 
     def angle_between_vectors(self, p1, p2):
         # Separete the values
@@ -119,6 +119,26 @@ class kinematicsFunctions():
 
     # Get y_list parameter
     def get_y_list(self):
-        return self.y_list   
+        return self.y_list
+    
 
+    def get_target(self, p1, p2, theta):
+        # Separete the values
+        x1, y1 = p1[0], p1[1]
+        x2, y2 = p2[0], p2[1]
+
+        # Target rotation
+        y2_aux = math.cos(theta)*y2 + math.sin(theta)*x2
+        x2_aux = -math.sin(theta)*y2 + math.cos(theta)*x2
+        
+        if ((x2 > 0 and x1 > 0) and (y2 > 0 and y1 < 0)):
+            x2_aux += x1        
+        else:      
+            x2_aux -= x1
+        y2_aux -= y1 
+
+        angle = math.atan2(y2_aux, x2_aux) - math.pi/2
+        distance = math.sqrt(y2_aux**2 + x2_aux**2)
+
+        return angle, distance
         

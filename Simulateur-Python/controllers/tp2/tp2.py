@@ -12,6 +12,8 @@ from kinematics_func import kinematicsFunctions
 
 keyboard_mode = False # set True if you want to control the robot with your keyboard (UP, DOWN, LEFT, RIGHT)
 graph_mode = False # set True if you want to see the 2D matplotlib graphic representation of the system
+debug_mode = False # set True if you want to debug
+debug_pt3 = False # set True if you want to debug the last part of the TP (undone)
 
 if graph_mode:
     graph1 = graphWalls()
@@ -45,6 +47,7 @@ dt = 0
 plot = 0
 speed = 5
 point_counter = 0
+linear_displacement = 0
 
 x_list_ref = []
 y_list_ref = []
@@ -81,35 +84,71 @@ def keyboard_control():
         motor_left.setVelocity(0)
         motor_right.setVelocity(0)
 
+
+need_to_rotate = True
+arrived = True
+remaining_distance = 0
+previous_point_counter = 1000
+travelled_distance = 0
+
 # This function is called when we aren't in the keyboard mode
-def trajectory_update(theta_pose, p1, p2, point_counter):
+def trajectory_update(p1, p2, point_counter, orientation):
     k = kinematicsFunctions(p1[0], p1[1], 0)
 
-    angle_to_destination = k.angle_between_vectors(p1, p2)
+    global arrived, need_to_rotate, remaining_distance, travelled_distance
 
-    k.rotate(angle_to_destination)
+    angle_to_destination, distance_to_destination = k.get_target(p1, p2, orientation)
+    
+    if distance_to_destination == 0:
+        point_counter += 1
+        return point_counter
 
-    theta = math.degrees(angle_to_destination)
+    if debug_pt3:
+        print("point: ", point_counter)
 
-    print(math.cos(angle_to_destination), math.cos(theta_pose))
+    if arrived and need_to_rotate: # nouveau point
+        if debug_pt3:
+            print("hey 1")
+        need_to_rotate = True
+        arrived = False
+        travelled_distance = 0
 
-    if -1 < theta < 1 and (0.8 < abs(math.cos(theta_pose)/math.cos(angle_to_destination)) < 1.2) : # go straight
+    elif not arrived and not need_to_rotate : # go straight
+        if debug_pt3:
+            print("hey 2")
         motor_left.setVelocity(speed)
         motor_right.setVelocity(speed)
+        travelled_distance += linear_displacement
+        if debug_pt3:
+            print("travelled_distance", travelled_distance)
+            print("distance_to_destination", distance_to_destination)
 
-    elif -1 < theta < 180:
-        motor_left.setVelocity(-speed)
-        motor_right.setVelocity(speed)
-    else:
-        print("helloo")
-        motor_left.setVelocity(0)
-        motor_right.setVelocity(0)
+        if  0.99 < abs(travelled_distance/(distance_to_destination + 0.02)) < 1.01:
+            arrived = True
+
+    elif not arrived and need_to_rotate: # rotation
+        if debug_pt3:
+            print("hey 3", angle_to_destination, orientation)
+
+        if angle_to_destination < -1.57:
+            need_to_rotate = False
+        elif abs(angle_to_destination - orientation) < 0.008:
+            motor_left.setVelocity(-speed)
+            motor_right.setVelocity(speed)
+        elif abs(orientation - angle_to_destination) < 0.008:
+            motor_left.setVelocity(speed)
+            motor_right.setVelocity(-speed)
+        elif orientation != 0:
+            if 0.99 < angle_to_destination/orientation < 1.01:
+                need_to_rotate = False
+        elif angle_to_destination != 0:
+            if 0.99 < orientation/angle_to_destination < 1.01:
+                need_to_rotate = False
+
+    else: # arrived
+        arrived = True
+        need_to_rotate = True
         point_counter += 1
-
-
-    k.rotate(angle_to_destination)
-
-    k.translate(p1, p2)
     
     return point_counter
 
@@ -120,7 +159,7 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
     vL = motor_left.getVelocity()
     vR = motor_right.getVelocity() 
     
-    pose = kinematics.get_new_pose(vL, vR, dt)
+    linear_displacement, pose = kinematics.get_new_pose(vL, vR, dt)
     
     position = node.getPosition() ## x y z 
     orientation = node.getOrientation()
@@ -130,11 +169,12 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
     y_list_ref.append(100*position[2])
     
     if plot % 100 == 0:
-        # print("\n------------------------------------------------------------------------------")
-        # print("Measured position: ", pose)
-        # print("Simulated position S: ", position)
-        # print("Measured theta: ", -math.degrees(pose["theta"]))
-        # print("Simulated theta: ", math.degrees(math.atan2(orientation[6], orientation[0])))
+        if debug_mode:
+            print("\n------------------------------------------------------------------------------")
+            print("Measured position: ", pose)
+            print("Simulated position S: ", position)
+            print("Measured theta: ", -math.degrees(pose["theta"]))
+            print("Simulated theta: ", math.degrees(math.atan2(orientation[6], orientation[0])))
                
         if graph_mode:
             graph1.plot_robot(x_list_ref, y_list_ref, 'blue')
@@ -148,7 +188,7 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
         if (point_counter < len(trajectory)):
             p1 = [pose["y"], pose["x"]]
             p2 = [trajectory[point_counter]['x'], trajectory[point_counter]['y']]
-            point_counter = trajectory_update(pose["theta"], p1, p2, point_counter)
+            point_counter = trajectory_update(p1, p2, point_counter, pose["theta"])
         else:
             point_counter = 0
 

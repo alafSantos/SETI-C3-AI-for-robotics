@@ -4,7 +4,7 @@ from controller import Keyboard
 from graph_walls import graphWalls # a class I wrote
 from kinematics_func import kinematicsFunctions # a class I wrote
 
-walls = graphWalls()
+# walls = graphWalls()
 kinematics = kinematicsFunctions()
 
 robot = Supervisor()
@@ -42,7 +42,7 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
     vL = motor_left.getVelocity()
     vR = motor_right.getVelocity() 
     
-    pose = kinematics.get_pose(vL, vR, dt)    
+    pose = kinematics.get_new_pose(vL, vR, dt)    
     
     if plot % 100 == 0:
         position = node.getPosition() ## x y z 

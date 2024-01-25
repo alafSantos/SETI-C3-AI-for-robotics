@@ -60,7 +60,7 @@ class graphWalls():
         plt.ion()
         tmp, = self.ax.plot(x, y, 'bo')
         plt.draw()
-        plt.pause(1)
+        plt.pause(0.4)
         # plt.clf()
 
         # label = "(x, y) = " + "(" + str(x) + ", " + str(y) + ")"

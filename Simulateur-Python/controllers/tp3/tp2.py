@@ -10,16 +10,16 @@ from controller import Keyboard
 from graph_walls import graphWalls
 from kinematics_func import kinematicsFunctions
 
-keyboard_mode = True # set True if you want to control the robot with your keyboard (UP, DOWN, LEFT, RIGHT)
-graph_mode = True # set True if you want to see the 2D matplotlib graphic representation of the system
+keyboard_mode = False # set True if you want to control the robot with your keyboard (UP, DOWN, LEFT, RIGHT)
+graph_mode = False # set True if you want to see the 2D matplotlib graphic representation of the system
 debug_mode = False # set True if you want to debug
-debug_pt3 = True # set True if you want to debug the last part of the TP (undone)
+debug_pt3 = False # set True if you want to debug the last part of the TP (undone)
 
 if graph_mode:
     graph1 = graphWalls()
     graph2 = graphWalls()
 
-kinematics = kinematicsFunctions(2.1 * 1e-2, 10.8 * 1e-2) # wheel radius and track width as parameters
+kinematics = kinematicsFunctions(2.105 * 1e-2, 10.8 * 1e-2) # wheel radius and track width as parameters
 
 robot = Supervisor()
 keyboard = Keyboard()
@@ -88,16 +88,15 @@ def keyboard_control():
 need_to_rotate = True
 arrived = True
 remaining_distance = 0
+previous_point_counter = 1000
 travelled_distance = 0
-distance_to_destination = 0
-
 
 # This function is called when we aren't in the keyboard mode
 def trajectory_update(p1, p2, point_counter, orientation):
     k = kinematicsFunctions(p1[0], p1[1], 0)
 
-    global arrived, need_to_rotate, linear_displacement, remaining_distance, travelled_distance, distance_to_destination
-    
+    global arrived, need_to_rotate, remaining_distance, travelled_distance
+
     angle_to_destination, distance_to_destination = k.get_target(p1, p2, orientation)
     
     if distance_to_destination == 0:
@@ -120,48 +119,37 @@ def trajectory_update(p1, p2, point_counter, orientation):
         motor_left.setVelocity(speed)
         motor_right.setVelocity(speed)
         travelled_distance += linear_displacement
-
-        remaining_distance = distance_to_destination - travelled_distance
-
         if debug_pt3:
             print("travelled_distance", travelled_distance)
             print("distance_to_destination", distance_to_destination)
-            print("cond: ", 100*abs(remaining_distance/distance_to_destination))
 
-        if 100*abs(remaining_distance/(distance_to_destination + 0.000001)) < 1:
+        if  0.99 < abs(travelled_distance/(distance_to_destination + 0.02)) < 1.01:
             arrived = True
-        
-        # if  0.999 < abs(travelled_distance/(distance_to_destination + 0.000001)) < 1.001 or 0.999 < abs(distance_to_destination/(travelled_distance + 0.000001)) < 1.001:
-        #     arrived = True
 
     elif not arrived and need_to_rotate: # rotation
         if debug_pt3:
-            print("hey 3", angle_to_destination, orientation, abs(math.sin(angle_to_destination)))
+            print("hey 3", angle_to_destination, orientation)
 
-        if 0 < abs(math.sin(angle_to_destination)) < 0.0001 or 0.999 < abs(math.sin(angle_to_destination)) < 1.001:
+        if angle_to_destination < -1.57:
             need_to_rotate = False
-            print("h1")
-        elif angle_to_destination - orientation < 0.0001:
+        elif abs(angle_to_destination - orientation) < 0.008:
             motor_left.setVelocity(-speed)
             motor_right.setVelocity(speed)
-            print("h2")
-        elif orientation - angle_to_destination < 0.0001:
+        elif abs(orientation - angle_to_destination) < 0.008:
             motor_left.setVelocity(speed)
             motor_right.setVelocity(-speed)
-            print("h3")
         elif orientation != 0:
-            print("h4")
-            if 0.9999 < angle_to_destination/orientation < 1.0001:
+            if 0.99 < angle_to_destination/orientation < 1.01:
                 need_to_rotate = False
         elif angle_to_destination != 0:
-            if 0.9999 < orientation/angle_to_destination < 1.0001:
+            if 0.99 < orientation/angle_to_destination < 1.01:
                 need_to_rotate = False
 
     else: # arrived
         arrived = True
         need_to_rotate = True
         point_counter += 1
-        
+    
     return point_counter
 
 while (robot.step(timestep) != -1): #Appel d'une etape de simulation

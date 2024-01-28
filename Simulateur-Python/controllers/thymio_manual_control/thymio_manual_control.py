@@ -1,11 +1,13 @@
+# c:\users\bastien\appdata\local\programs\python\python39\python
 import sys,os
+sys.path.append('C:\Program Files\Webots\lib\controller\python39')
 import math
 import time;
 from controller import *
 import matplotlib.pyplot as plt
 import numpy as np
-# import matplotlib
-# from matplotlib import collections  as mc
+import matplotlib
+from matplotlib import collections  as mc
 import random
 from scipy.spatial import cKDTree as KDTree
 

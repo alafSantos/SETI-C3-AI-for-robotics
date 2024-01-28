@@ -8,7 +8,7 @@ import numpy as np
 import math
 
 class kinematicsFunctions():
-    def __init__(self, radius=2.1 * 1e-2, track=10.8 * 1e-2, x=0.125, y=-0.5, orientation=0):
+    def __init__(self, radius=2.105 * 1e-2, track=10.8 * 1e-2, x=0.125, y=-0.5, orientation=0):
         # Initial Pose
         self.robot_pose = {'x': x, 'y': y, 'theta': orientation}
 
@@ -24,8 +24,7 @@ class kinematicsFunctions():
         self.labyrinth_trajectory = [
             {'x': -0.500, 'y': 0.125},
             {'x': -0.150, 'y': 0.125},
-            # {'x': -0.650, 'y': 0.150},
-            {'x': -0.150, 'y': 0.600},
+            {'x': -0.150, 'y': 0.900},
             {'x': 0.574, 'y': 0.574},
             {'x': 0.584, 'y': 0.409},
             {'x': 0.187, 'y': 0.402},
@@ -129,8 +128,8 @@ class kinematicsFunctions():
         x2, y2 = p2[0], p2[1]
 
         # Target rotation
-        x2_aux = math.cos(theta)*y2 + math.sin(theta)*x2
-        y2_aux = -math.sin(theta)*y2 + math.cos(theta)*x2
+        y2_aux = math.cos(theta)*y2 + math.sin(theta)*x2
+        x2_aux = -math.sin(theta)*y2 + math.cos(theta)*x2
         
         if ((x2 > 0 and x1 > 0) and (y2 > 0 and y1 < 0)):
             x2_aux += x1        
@@ -138,7 +137,7 @@ class kinematicsFunctions():
             x2_aux -= x1
         y2_aux -= y1 
 
-        angle = math.atan2(y2_aux, x2_aux) #- math.pi/2
+        angle = math.atan2(y2_aux, x2_aux) - math.pi/2
         distance = math.sqrt(y2_aux**2 + x2_aux**2)
 
         return angle, distance

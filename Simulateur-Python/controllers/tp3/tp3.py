@@ -6,14 +6,13 @@ tp3 controller (main file)
 # Importing the needed libraries
 import math
 from controller import *
-from controller import Keyboard
 
 import functions
 from graph_walls import graphWalls
 from kinematics_func import kinematicsFunctions
 
 keyboard_mode = True # set True if you want to control the robot with your keyboard (UP, DOWN, LEFT, RIGHT)
-graph_mode = False # set True if you want to see the 2D matplotlib graphic representation of the system
+graph_mode = True # set True if you want to see the 2D matplotlib graphic representation of the system
 debug_mode = False # set True if you want to debug
 
 if graph_mode:
@@ -28,8 +27,8 @@ keyboard = Keyboard()
 timestep = int(robot.getBasicTimeStep())
 keyboard.enable(timestep)
 
-motor_left = robot.getDevice("motor.left");
-motor_right = robot.getDevice("motor.right");
+motor_left = robot.getDevice("motor.left")
+motor_right = robot.getDevice("motor.right")
 motor_left.setPosition(float('inf'))
 motor_right.setPosition(float('inf'))
 motor_left.setVelocity(0)
@@ -73,7 +72,8 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
     trajectory_x_ref.append(-100*xyz_ref[0])
     trajectory_y_ref.append(100*xyz_ref[2])
     
-    if plot % 200 == 0:
+    if plot % 1000 == 0:
+        plot = 0
         if debug_mode:
             print("\n------------------------------------------------------------------------------")
             print("Measured position: ", pose)

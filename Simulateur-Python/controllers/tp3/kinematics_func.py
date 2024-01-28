@@ -122,6 +122,14 @@ class kinematicsFunctions():
         return self.y_list
     
 
+    def get_new_point(self, x2, y2, theta):
+        # Target rotation
+        y2_aux = math.cos(theta)*y2 + math.sin(theta)*x2
+        x2_aux = -math.sin(theta)*y2 + math.cos(theta)*x2
+
+        return x2_aux, y2_aux
+    
+
     def get_target(self, p1, p2, theta):
         # Separete the values
         x1, y1 = p1[0], p1[1]

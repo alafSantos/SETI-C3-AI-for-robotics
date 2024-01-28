@@ -4,8 +4,67 @@ Developed by Alaf DO NASCIMENTO SANTOS in the context of the Artificial Intellig
 given functions file
 '''
 
+import math
 import numpy as np
 from scipy.spatial import cKDTree as KDTree
+
+def multmatr(X,Y,T):
+    res = []
+    res.append( X[0] * Y[0] + X[3] * Y[1] + X[6] * Y[2] - T[0])
+    res.append( X[1] * Y[0] + X[4] * Y[1] + X[7] * Y[2] + T[1])
+    res.append( X[2] * Y[0] + X[5] * Y[1] + X[8] * Y[2] + T[2])
+    return res
+
+# This function is called when we are in the keyboard mode
+def keyboard_control(keyboard, Keyboard, motor_left, motor_right, speed):
+    key=keyboard.getKey()
+    
+    if (key==Keyboard.UP):
+        motor_left.setVelocity(speed)
+        motor_right.setVelocity(speed)
+        
+    elif (key==Keyboard.DOWN):
+        motor_left.setVelocity(-speed)
+        motor_right.setVelocity(-speed)
+    
+    elif(key==Keyboard.LEFT):
+        motor_left.setVelocity(-speed)
+        motor_right.setVelocity(speed)
+    
+    elif(key==Keyboard.RIGHT):
+        motor_left.setVelocity(speed)
+        motor_right.setVelocity(-speed)
+
+    else:
+        motor_left.setVelocity(0)
+        motor_right.setVelocity(0)
+
+
+def lidar_control(lidar, node, pose):
+    point_cloud = lidar.getRangeImage() # a 360-size list
+    angle = 0
+    rotation = node.getOrientation()
+    xyz_ref = node.getPosition()
+    xyz = [pose['x'], 0, pose['y']]
+    x_list = []
+    y_list = []
+    x_list_ref = []
+    y_list_ref = []
+
+    for i in point_cloud:
+        xy = [i*math.sin(angle), 0, i*math.cos(angle)]
+        
+        pt = multmatr(rotation,xy,xyz)
+        x_list.append(100*pt[0])
+        y_list.append(100*pt[2])
+        
+        pt_ref = multmatr(rotation,xy,xyz_ref)
+        x_list_ref.append(100*pt_ref[0])
+        y_list_ref.append(100*pt_ref[2])
+
+        angle += 2*math.pi / lidar.getHorizontalResolution()
+
+    return x_list, y_list, x_list_ref, y_list_ref, xyz_ref
 
 '''
 zoefjzoe

@@ -16,9 +16,7 @@ def multmatr(X,Y,T):
     return res
 
 # This function is called when we are in the keyboard mode
-def keyboard_control(keyboard, Keyboard, motor_left, motor_right, speed):
-    key=keyboard.getKey()
-    
+def keyboard_control(key, Keyboard, motor_left, motor_right, speed):    
     if (key==Keyboard.UP):
         motor_left.setVelocity(speed)
         motor_right.setVelocity(speed)
@@ -40,10 +38,11 @@ def keyboard_control(keyboard, Keyboard, motor_left, motor_right, speed):
         motor_right.setVelocity(0)
 
 
-def lidar_control(lidar, node, pose):
+def lidar_control(lidar, node, pose, kinematics):
     point_cloud = lidar.getRangeImage() # a 360-size list
     angle = 0
-    rotation = node.getOrientation()
+    rotation_ref = node.getOrientation()
+    rotation = kinematics.rotation_matrix(pose["theta"])
     xyz_ref = node.getPosition()
     xyz = [pose['x'], 0, pose['y']]
     x_list = []
@@ -58,7 +57,7 @@ def lidar_control(lidar, node, pose):
         x_list.append(100*pt[0])
         y_list.append(100*pt[2])
         
-        pt_ref = multmatr(rotation,xy,xyz_ref)
+        pt_ref = multmatr(rotation_ref,xy,xyz_ref)
         x_list_ref.append(100*pt_ref[0])
         y_list_ref.append(100*pt_ref[2])
 

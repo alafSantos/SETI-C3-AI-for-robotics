@@ -78,8 +78,8 @@ class kinematicsFunctions():
         return theta_rad
 
     def rotation_matrix(self, angle):
-        # Computing the rotation matrix
-        rotation_mat = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+        # Computing the rotation matrix (about the X-axis)
+        rotation_mat = [np.cos(angle), 0, np.sin(angle), 0, 1, 0, -np.sin(angle), 0, np.cos(angle)]
         return rotation_mat
     
     def rotate(self, angle):

@@ -151,7 +151,7 @@ def ICPSVD(fixedX, fixedY, movingX, movingY):
         distance, index = TREE.query(moving)
         err = np.mean(distance**2)
 
-        if err > 100: # if too big
+        if err > 1: # if too big
             reqR= np.zeros([3, 3])
             reqT = np.array([0, 0, 0])
             accept_flag = False

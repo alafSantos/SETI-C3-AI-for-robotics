@@ -12,7 +12,7 @@ from graph_walls import graphWalls
 from kinematics_func import kinematicsFunctions
 
 keyboard_mode = True # set True if you want to control the robot with your keyboard (UP, DOWN, LEFT, RIGHT)
-graph_mode = False # set True if you want to see the 2D matplotlib graphic representation of the system
+graph_mode = True # set True if you want to see the 2D matplotlib graphic representation of the system
 debug_mode = False # set True if you want to debug
 
 if graph_mode:
@@ -74,7 +74,7 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
     trajectory_x_ref.append(-100*xyz_ref[0])
     trajectory_y_ref.append(100*xyz_ref[2])
     
-    if plot % 100 == 0:
+    if plot % 2 == 0:
         plot = 0
         if debug_mode:
             print("\n------------------------------------------------------------------------------")

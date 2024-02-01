@@ -53,7 +53,7 @@ def lidar_control(lidar, node, pose, kinematics):
     for i in point_cloud:
         xy = [i*math.sin(angle), 0, i*math.cos(angle)]
         
-        pt = multmatr(rotation,xy,xyz)
+        pt = multmatr(rotation_ref,xy,xyz)
         x_list.append(100*pt[0])
         y_list.append(100*pt[2])
         
@@ -91,6 +91,11 @@ Iterated Closest Points (ICP) function
 La fonction ICP prend comme paramètres les coordonnées x,y des points fixes (les murs dans notre cas) et 
 les coordonnées xy des points mobiles (télémètres laser) que l’on souhaite recaler avec sur les murs. Elle 
 calcule la transformation (rotation + translation) pour replacer au mieux les données télémètres sur les murs.
+
+
+LEMBRAR DE VERIFICAR O ERRO PRA NAO TER DIVISAO POR ZERO
+CONVERTER PRA FLOAT OS DADOS
+
 '''
 def ICPSVD(fixedX, fixedY, movingX, movingY):
     reqR = np.identity(3) # Return a identity matrix

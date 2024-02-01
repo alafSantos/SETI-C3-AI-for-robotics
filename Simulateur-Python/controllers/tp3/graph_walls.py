@@ -7,8 +7,12 @@ graphWalls class - This class helps in displaying the simulated robot in a 2D vi
 import math
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+import functions
 
 class graphWalls():
+    '''
+    Class constructor
+    '''
     def __init__(self):
         # Initialise the figure
         self.fig, self.ax = plt.subplots()
@@ -16,6 +20,9 @@ class graphWalls():
         # Define axis limits
         self.lim = 100
 
+    '''
+    Function to build the walls on a cm scale
+    '''
     def build_the_walls(self):
         walls = [
             {'x': [-0.25, 0.25, 0.25, 0.75, 0.75], 'y': [-0.75, -0.75, 0.25, 0.25, 0.75]}, # external shape pt1
@@ -40,43 +47,14 @@ class graphWalls():
             
         return walls
     
-    # VERIFICAR ISSO AMANHA
-    def get_discretised_walls(self, walls):
-        discretized_walls_x = []
-        discretized_walls_y = []
-
-        for wall in walls:
-            wall_x = []
-            wall_y = []
-            for i in range(len(wall['x']) - 1):
-                x0, y0 = wall['x'][i], wall['y'][i]
-                x1, y1 = wall['x'][i + 1], wall['y'][i + 1]
-                length = math.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2)
-                
-                num_steps = int(length * 100)  # converting length to cm
-
-                x_step = (x1 - x0) / (num_steps + 1e-100)
-                y_step = (y1 - y0) / (num_steps + 1e-100)
-
-                for j in range(num_steps):
-                    x_aux = round((x0 + j * x_step)*100)
-                    y_aux = round((y0 + j * y_step)*100)
-
-                    wall_x.append(x_aux)
-                    wall_y.append(-y_aux)
-
-            discretized_walls_x.append(wall_y)
-            discretized_walls_y.append(wall_x)
-
-        return discretized_walls_x[0], discretized_walls_y[0]
     
-    
+    '''
+    Plot function for showing the simulated environment
+    '''
     def plot_robot(self, x, y, color='blue', destination=False):
         # Getting the pre-processed walls
         walls = []
         walls = self.build_the_walls()
-
-            # print(walls_x, walls_y)
 
         # Set aspect ratio to equal
         self.ax.set_aspect('equal', 'box')
@@ -88,10 +66,10 @@ class graphWalls():
 
         # Create animation
         plt.ion()
-        # if destination:
-        #     self.ax.plot(x, y, '+', color=color)
-        # else:
-        #     self.ax.plot(x, y, '*', color=color)
+        if destination:
+             self.ax.plot(x, y, '+', color=color)
+        else:
+             self.ax.plot(x, y, '*', color=color)
 
         # Plot the walls
         for wall_line in walls:
@@ -103,3 +81,30 @@ class graphWalls():
         plt.draw()
         plt.pause(0.001)
 
+    
+        
+    '''
+    Get function for the discretised wall (useful when doing ICP)
+    '''
+    def get_disc_walls():
+        # Wall coordinates
+        walls = [
+            {'x': [-0.25, 0.25, 0.25, 0.75, 0.75, 0.75, -0.25, -0.25, -0.75, -0.75, -0.25, -0.25], 'y': [-0.75, -0.75, 0.25, 0.25, 0.75, 0.75, 0.75, 0.25, 0.25, -0.25, -0.25, -0.75]}, # external shape
+        ]
+
+        walls_int = [
+            {'x': [0.5, 0, 0], 'y': [0.5, 0.5, -0.5]} # center pt1
+        ]
+
+        walls_int2 = [ 
+            {'x': [-0.5, 0], 'y': [0, 0]}, # center pt2
+        ]
+
+        x_list, y_list = functions.get_discretised_walls(walls)
+        x_list_int, y_list_int = functions.get_discretised_walls(walls_int)
+        x_list_int2, y_list_int2 = functions.get_discretised_walls(walls_int2)
+
+        walls_x_list = x_list + x_list_int + x_list_int2 # concatenating
+        walls_y_list = y_list + y_list_int + y_list_int2
+
+        return walls_x_list, walls_y_list

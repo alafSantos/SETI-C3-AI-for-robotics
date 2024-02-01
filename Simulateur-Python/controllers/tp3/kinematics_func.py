@@ -3,11 +3,13 @@ Developed by Alaf DO NASCIMENTO SANTOS in the context of the Artificial Intellig
 
 kinematicsFunctions class - This class helps in computing the robot kinematics parameters
 '''
-
 import numpy as np
 import math
 
 class kinematicsFunctions():
+    '''
+    Class constructor
+    '''
     def __init__(self, radius=2.105 * 1e-2, track=10.8 * 1e-2, x=0.125, y=-0.5, orientation=0):
         # Initial Pose
         self.robot_pose = {'x': x, 'y': y, 'theta': orientation}
@@ -53,6 +55,11 @@ class kinematicsFunctions():
         
         return linear_displacement, angular_displacement
 
+
+    def set_pose(self, x, y, theta):
+        self.robot_pose["x"] = x
+        self.robot_pose["y"] = y
+        self.robot_pose["theta"] = theta
 
     def get_new_pose(self, left_wheel_speed, right_wheel_speed, dt):
         # Calculate linear and angular displacements

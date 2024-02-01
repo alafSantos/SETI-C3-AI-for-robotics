@@ -5,6 +5,7 @@ tp3 controller (main file)
 '''
 # Importing the needed libraries
 import math
+import time
 from controller import *
 
 import functions
@@ -12,7 +13,7 @@ from graph_walls import graphWalls
 from kinematics_func import kinematicsFunctions
 
 keyboard_mode = True # set True if you want to control the robot with your keyboard (UP, DOWN, LEFT, RIGHT)
-graph_mode = True # set True if you want to see the 2D matplotlib graphic representation of the system
+graph_mode = False # set True if you want to see the 2D matplotlib graphic representation of the system
 debug_mode = False # set True if you want to debug
 
 if graph_mode:
@@ -57,9 +58,8 @@ trajectory_x_ref = []
 trajectory_y_ref = []
 
 while (robot.step(timestep) != -1): #Appel d'une etape de simulation
-    key=keyboard.getKey()
-
     plot += 1
+
     t = robot.getTime()
     vL = motor_left.getVelocity()
     vR = motor_right.getVelocity()
@@ -67,14 +67,14 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
     dt = t - t_previous
 
     linear_displacement, pose = kinematics.get_new_pose(vL, vR, dt)
-    x_list, y_list, x_list_ref, y_list_ref, xyz_ref = functions.lidar_control(lidar, node, pose, kinematics)
+    x_list, y_list, x_list_ref, y_list_ref, xyz_ref = functions.lidar_control(lidar, node, pose, kinematics, time.time())
 
     trajectory_x.append(-100*pose['x'])
     trajectory_y.append(100*pose['y'])
     trajectory_x_ref.append(-100*xyz_ref[0])
     trajectory_y_ref.append(100*xyz_ref[2])
     
-    if plot % 2 == 0:
+    if plot % 100 == 0:
         plot = 0
         if debug_mode:
             print("\n------------------------------------------------------------------------------")
@@ -87,10 +87,10 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
             graph1.plot_robot(x_list, y_list, 'red') # LIDAR
             graph1.plot_robot(trajectory_x, trajectory_y, 'black')
 
-            graph2.plot_robot(x_list_ref, y_list_ref, 'blue') # LIDAR
+            graph2.plot_robot(x_list_ref, y_list_ref, 'blue') # REF
             graph2.plot_robot(trajectory_x_ref, trajectory_y_ref, 'black')
 
-    functions.keyboard_control(key, Keyboard, motor_left, motor_right, speed)
+    functions.keyboard_control(keyboard, Keyboard, motor_left, motor_right, speed)
     t_previous = t
       
 keyboard.disable()

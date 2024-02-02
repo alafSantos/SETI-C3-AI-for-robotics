@@ -8,7 +8,9 @@ import math
 import numpy as np
 from scipy.spatial import cKDTree as KDTree
 from graph_walls import graphWalls
+from kinematics_func import kinematicsFunctions
 
+kinematics = kinematicsFunctions()
 t_previous = 0 # Global variable used when doing ICP (get the previous timestamp)
 
 '''
@@ -38,6 +40,25 @@ def keyboard_control(keyboard, Keyboard, motor_left, motor_right, speed):
         motor_right.setVelocity(0)
 
 
+def apply_ICP(x_list, y_list):
+    walls_x_list, walls_y_list = graphWalls.get_disc_walls()
+
+    print(walls_x_list, walls_y_list, x_list, y_list)
+    
+    reqR, reqT = ICPSVD(walls_x_list, walls_y_list, x_list, y_list)
+
+    # theta = math.atan2(reqR[1][0], reqR[0][0])
+    # kinematics.set_pose(xy[0]-reqT[0], xy[1]+reqT[1], theta)
+
+    new_x = []
+    new_y = []
+    for i in range(len(x_list)): 
+        new_lidar = np.array([float(x_list[i]), float(y_list[i]), 0.0])
+        new_x.append(new_lidar)
+        new_y.append(np.matmul(reqR, new_lidar.transpose()) + reqT)
+        
+    return new_x, new_y
+
 '''
 This function is called when using LIDAR measurements
 '''
@@ -55,8 +76,6 @@ def lidar_control(lidar, node, pose, kinematics, t_current):
     x_list_ref = []
     y_list_ref = []
 
-    walls_x_list, walls_y_list = graphWalls.get_disc_walls()
-
     for point in point_cloud:
         xy = [point*math.sin(angle), 0, point*math.cos(angle)]
         
@@ -70,30 +89,7 @@ def lidar_control(lidar, node, pose, kinematics, t_current):
 
         angle += 2*math.pi / lidar.getHorizontalResolution()
 
-    if t_current - t_previous >= 5 : # calculate the transformation every 5 seconds
-        t_previous = t_current
-        accept_flag, reqR, reqT = ICPSVD(walls_x_list, walls_y_list, x_list, y_list)
-        
-
-        if accept_flag:
-            theta = math.atan2(reqR[1][0], reqR[0][0])
-
-            y2_aux = math.cos(theta)*pose["y"] + math.sin(theta)*pose["x"]
-            x2_aux = -math.sin(theta)*pose["y"] + math.cos(theta)*pose["x"]
-
-            print("ref: ", xyz_ref, "measured: ", xyz, "measured ICP: ", [x2_aux, y2_aux] )
-
-            new_x = []
-            new_y = []
-            for i in range(len(x_list)): 
-                new_lidar = np.array([float(x_list[i]), float(y_list[i]), 0.0])
-                new_x.append(new_lidar)
-                new_y.append(np.matmul(reqR, new_lidar.transpose()) + reqT)
-                
-            x_list = new_x
-            y_list = new_y
-
-    return x_list, y_list, x_list_ref, y_list_ref, xyz_ref
+    return x_list, y_list, x_list_ref, y_list_ref, xyz, xyz_ref
 
 '''
 This function applies the change of referential in 3D
@@ -146,16 +142,9 @@ def ICPSVD(fixedX, fixedY, movingX, movingY):
     
     TREE = KDTree(fixed)
     
-    accept_flag = False
     for i in range(10):
         distance, index = TREE.query(moving)
         err = np.mean(distance**2)
-
-        if err > 1: # if too big
-            reqR= np.zeros([3, 3])
-            reqT = np.array([0, 0, 0])
-            accept_flag = False
-            continue
 
         com = np.mean(moving,0)
         cof = indxtMean(index,fixed)
@@ -169,9 +158,8 @@ def ICPSVD(fixedX, fixedY, movingX, movingY):
         moving = np.add(moving,tempT) 
         reqR=np.dot(tempR,reqR)
         reqT = np.add(np.dot(tempR,reqT),tempT)
-        accept_flag = True
 
-    return accept_flag, reqR, reqT
+    return reqR, reqT
 
 
 '''

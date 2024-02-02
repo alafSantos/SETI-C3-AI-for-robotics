@@ -51,7 +51,7 @@ class graphWalls():
     '''
     Plot function for showing the simulated environment
     '''
-    def plot_robot(self, x, y, color='blue', destination=False):
+    def plot_robot(self, x, y, color='blue', destination=False, traj = False):
         # Getting the pre-processed walls
         walls = []
         walls = self.build_the_walls()
@@ -68,8 +68,10 @@ class graphWalls():
         plt.ion()
         if destination:
              self.ax.plot(x, y, '+', color=color)
+        elif traj:
+             self.ax.plot(x, y, color=color)
         else:
-             self.ax.plot(x, y, '*', color=color)
+            self.ax.plot(x, y, '*', color=color)
 
         # Plot the walls
         for wall_line in walls:

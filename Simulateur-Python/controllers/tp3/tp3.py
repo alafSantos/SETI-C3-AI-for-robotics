@@ -17,10 +17,8 @@ graph_mode = True # set True if you want to see the 2D matplotlib graphic repres
 debug_mode = False # set True if you want to debug
 
 if graph_mode:
-    graph1 = graphWalls()
+    graph = graphWalls()
     graph2 = graphWalls()
-
-kinematics = kinematicsFunctions(2.105 * 1e-2, 10.6 * 1e-2) # wheel radius and track width as parameters
 
 robot = Supervisor()
 keyboard = Keyboard()
@@ -40,8 +38,8 @@ t = 0
 plot = 0
 speed = 5
 
-x_list = []
-y_list = []
+x_list_LIDAR = []
+y_list_LIDAR = []
 x_list_ref = []
 y_list_ref = []
 
@@ -51,15 +49,21 @@ lidar.enablePointCloud()
 
 dt = 0
 t_previous = 0
+t_previous_ICP = 0
 xyz_ref = []
 trajectory_x = []
 trajectory_y = []
 trajectory_x_ref = []
 trajectory_y_ref = []
 
+xyz_init = node.getPosition()
+theta_init = node.getOrientation()
+theta_init = math.atan2(theta_init[6], theta_init[0])
+kinematics = kinematicsFunctions(2.105 * 1e-2, 10.6 * 1e-2, xyz_init[0], xyz_init[2], theta_init) # wheel radius and track width as parameters
+
 while (robot.step(timestep) != -1): #Appel d'une etape de simulation
     plot += 1
-
+    t_ICP = time.time()
     t = robot.getTime()
     vL = motor_left.getVelocity()
     vR = motor_right.getVelocity()
@@ -67,10 +71,14 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
     dt = t - t_previous
 
     linear_displacement, pose = kinematics.get_new_pose(vL, vR, dt)
-    x_list, y_list, x_list_ref, y_list_ref, xyz_ref = functions.lidar_control(lidar, node, pose, kinematics, time.time())
+    x_list_LIDAR, y_list_LIDAR, x_list_ref, y_list_ref, xyz, xyz_ref = functions.lidar_control(lidar, node, pose, kinematics, time.time())
 
-    trajectory_x.append(-100*pose['x'])
-    trajectory_y.append(100*pose['y'])
+    if t_ICP - t_previous_ICP >= 5 : # calculate the transformation every 5 seconds
+        t_previous_ICP = t_ICP
+        x_list_LIDAR, y_list_LIDAR = functions.apply_ICP(x_list_LIDAR, y_list_LIDAR)
+
+    trajectory_x.append(-100*xyz[0])
+    trajectory_y.append(100*xyz[2])
     trajectory_x_ref.append(-100*xyz_ref[0])
     trajectory_y_ref.append(100*xyz_ref[2])
     
@@ -79,16 +87,16 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
         if debug_mode:
             print("\n------------------------------------------------------------------------------")
             print("Measured position: ", pose)
-            print("Simulated position S: ", position)
+            # print("Simulated position S: ", position)
             print("Measured theta: ", -math.degrees(pose["theta"]))
-            print("Simulated theta: ", math.degrees(math.atan2(orientation[6], orientation[0])))
+            # print("Simulated theta: ", math.degrees(math.atan2(orientation[6], orientation[0])))
 
         if graph_mode:
-            graph1.plot_robot(x_list, y_list, 'red') # LIDAR
-            graph1.plot_robot(trajectory_x, trajectory_y, 'black')
+            graph.plot_robot(x_list_LIDAR, y_list_LIDAR, 'red')
+            graph.plot_robot(trajectory_x, trajectory_y, 'orange')
 
             graph2.plot_robot(x_list_ref, y_list_ref, 'blue') # REF
-            graph2.plot_robot(trajectory_x_ref, trajectory_y_ref, 'black')
+            graph2.plot_robot(trajectory_x_ref, trajectory_y_ref, 'green')
 
     functions.keyboard_control(keyboard, Keyboard, motor_left, motor_right, speed)
     t_previous = t

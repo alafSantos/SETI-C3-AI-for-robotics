@@ -71,7 +71,7 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
     dt = t - t_previous
 
     linear_displacement, pose = kinematics.get_new_pose(vL, vR, dt)
-    x_list_LIDAR, y_list_LIDAR, x_list_ref, y_list_ref, xyz, xyz_ref = functions.lidar_control(lidar, node, pose, kinematics, time.time())
+    x_list_LIDAR, y_list_LIDAR, x_list_ref, y_list_ref, xyz, xyz_ref = functions.lidar_control(lidar, node, pose, kinematics)
 
     if t_ICP - t_previous_ICP >= 5 : # calculate the transformation every 5 seconds
         t_previous_ICP = t_ICP
@@ -82,7 +82,7 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
     trajectory_x_ref.append(-100*xyz_ref[0])
     trajectory_y_ref.append(100*xyz_ref[2])
     
-    if plot % 100 == 0:
+    if plot % 1000 == 0:
         plot = 0
         if debug_mode:
             print("\n------------------------------------------------------------------------------")

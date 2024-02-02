@@ -62,7 +62,7 @@ def apply_ICP(x_list, y_list):
 '''
 This function is called when using LIDAR measurements
 '''
-def lidar_control(lidar, node, pose, kinematics, t_current):
+def lidar_control(lidar, node, pose, kinematics):
     global t_previous
 
     point_cloud = lidar.getRangeImage() # a 360-size list

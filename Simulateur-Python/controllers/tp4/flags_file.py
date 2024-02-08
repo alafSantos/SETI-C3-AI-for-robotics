@@ -1,5 +1,7 @@
 flags = {
     "debug": True,
     "graphics": True,
-    "keyboard": False
+    "keyboard": False,
+    "bubble": False,
+    "Reactive": True
 }

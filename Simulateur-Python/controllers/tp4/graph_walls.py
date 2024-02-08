@@ -85,7 +85,7 @@ class graphWalls():
     
     def simple_plot(self, x_lidar, y_lidar):
         plt.ion() 
-            
+        
         plt.plot(x_lidar, y_lidar, "b*") # lidar
         plt.plot(0, 0, "r+") # robot
         
@@ -93,56 +93,3 @@ class graphWalls():
         plt.pause(0.001)    
         plt.clf()
 
-
-    '''
-    This function discretises the walls when doing ICP
-    '''
-    def get_discretised_walls(walls):
-        discretized_walls_x = []
-        discretized_walls_y = []
-        for wall in walls:
-            wall_x = []
-            wall_y = []
-            for i in range(len(wall['x']) - 1):
-                x0, y0 = wall['x'][i], wall['y'][i]
-                x1, y1 = wall['x'][i + 1], wall['y'][i + 1]
-                length = np.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2)
-                
-                num_steps = int(length * 100)  # converting length to cm
-                x_step = (x1 - x0) / (num_steps + 1e-100)
-                y_step = (y1 - y0) / (num_steps + 1e-100)
-                for j in range(num_steps):
-                    x_aux = round((x0 + j * x_step)*100)
-                    y_aux = round((y0 + j * y_step)*100)
-                    wall_x.append(x_aux)
-                    wall_y.append(-y_aux)
-            discretized_walls_x.append(wall_y)
-            discretized_walls_y.append(wall_x)
-        return discretized_walls_x[0], discretized_walls_y[0]
-
-
-    '''
-    Get function for the discretised wall (useful when doing ICP)
-    '''
-    def get_disc_walls(self):
-        # Wall coordinates
-        walls = [
-            {'x': [-0.25, 0.25, 0.25, 0.75, 0.75, 0.75, -0.25, -0.25, -0.75, -0.75, -0.25, -0.25], 'y': [-0.75, -0.75, 0.25, 0.25, 0.75, 0.75, 0.75, 0.25, 0.25, -0.25, -0.25, -0.75]}, # external shape
-        ]
-
-        walls_int = [
-            {'x': [0.5, 0, 0], 'y': [0.5, 0.5, -0.5]} # center pt1
-        ]
-
-        walls_int2 = [ 
-            {'x': [-0.5, 0], 'y': [0, 0]}, # center pt2
-        ]
-
-        x_list, y_list = self.get_discretised_walls(walls)
-        x_list_int, y_list_int = self.get_discretised_walls(walls_int)
-        x_list_int2, y_list_int2 = self.get_discretised_walls(walls_int2)
-
-        walls_x_list = x_list + x_list_int + x_list_int2 # concatenating
-        walls_y_list = y_list + y_list_int + y_list_int2
-
-        return walls_x_list, walls_y_list

@@ -31,7 +31,7 @@ def lidar_control(lidar):
     for point in point_cloud:
         xy = [point*np.sin(angle), point*np.cos(angle)]
         
-        if not flags["Reactive"]:
+        if not flags["reactive"]:
             if not (np.pi/2 < angle < (3/2)*np.pi):
                 if flags["bubble"]:
                     # Taking only points inside a defined threshold
@@ -54,7 +54,7 @@ def lidar_control(lidar):
 
         angle += 2*np.pi / lidar.getHorizontalResolution()
 
-    if flags["Reactive"]:
+    if flags["reactive"]:
         xy_lidar = [x_r_list, y_r_list, x_l_list, y_l_list, lidar_list]
 
     return xy_lidar 
@@ -132,6 +132,25 @@ def find_nearest_lidar_point(lidar_data):
 
     return nearest_lidar_point_index
 
+def control_speed(x, y):
+    # Compute the distance to reach the target
+    dist = distance([x, y], [0, 0])
+
+    # Empirical maximum distance (it isn't always true)
+    max_dist = 0.09
+    speed = 9.53*dist/max_dist
+
+    # In case of saturation, use full-speed
+    if speed > 9.53:
+        speed = 9.53
+    
+    # Debug
+    if flags["debug"]:
+        print("Distance to destination: ", dist)
+        print("Speed: ", speed)
+
+    return speed
+
 def control_motors(motor_left, motor_right, speed, angle):
     # Negative angle, turn left
     if angle < -0.1: 
@@ -150,7 +169,7 @@ def motor_control_based_on_lidar(lidar_data, motor_left, motor_right, speed):
     global rotation_angle, largest_gap_distance, largest_gap_index, rotation_counter
     global best_point_rotation_angle, best_point_distance
 
-    if not flags["bubble"] and not flags["Reactive"]:
+    if not flags["bubble"] and not flags["reactive"]:
         m_per_counter = speed/2500 # estimated value
         rad_per_counter = (speed/(1.5*9.53))*np.pi/90 # estimated value
         precision = 0.84    
@@ -214,20 +233,47 @@ def motor_control_based_on_lidar(lidar_data, motor_left, motor_right, speed):
             ready_rotate = False
             stop(motor_left, motor_right)
 
-    elif flags["Reactive"]: # Without the rotation + translation
+    elif flags["reactive"]: # Without the rotation + translation
         # Calculate the average position for left and right regions
         p_r = len(lidar_data[0]) // 4
         p_l = 3 * len(lidar_data[2]) // 4
 
-        x_r_avg = sum(lidar_data[0][:p_r]) / p_r
-        x_l_avg = sum(lidar_data[2][p_l:]) / (len(lidar_data[2]) - p_l)
+        x_r = 0
+        for idx, point in enumerate(lidar_data[0]):
+            if idx == p_r:
+                break
+            x_r += point
 
-        y_r_avg = sum(lidar_data[1][:p_r]) / p_r
-        y_l_avg = sum(lidar_data[3][p_l:]) / (len(lidar_data[3]) - p_l)
+        x_l = 0
+        for idx, point in enumerate(lidar_data[2]):
+            if idx == p_r:
+                break
+            x_l += point
+
+        y_r = 0
+        for idx, point in enumerate(lidar_data[0]):
+            if idx == p_r:
+                break
+            y_r += point
+
+        y_l = 0
+        for idx, point in enumerate(lidar_data[0]):
+            if idx == p_r:
+                break
+            y_l += point
+
+        x_r_avg = x_r/ p_r
+        y_r_avg = y_r / p_r
+
+        x_l_avg = x_l/ (len(lidar_data[2]) - p_l)
+        y_l_avg = y_l/ (len(lidar_data[3]) - p_l)
 
         # Calculate the central point between left and right regions
         x = (x_r_avg + x_l_avg) / 2
         y = (y_r_avg + y_l_avg) / 2
+
+        # Adjust speed based on the distance
+        speed = control_speed(x, y)
 
         # Adjust robot movement based on the angle to the target
         control_motors(motor_left, motor_right, speed, np.arctan2(x, y))

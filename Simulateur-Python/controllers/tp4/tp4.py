@@ -48,7 +48,7 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
             # print("Lidar: ", xy_lidar_list)
 
         if flags["graphics"]:
-            if flags["Reactive"]:
+            if flags["reactive"]:
                 graph.simple_plot([point[0] for point in xy_lidar_list[-1]], [point[1] for point in xy_lidar_list[-1]]) # LIDAR
             else:    
                 graph.simple_plot([point[0] for point in xy_lidar_list], [point[1] for point in xy_lidar_list]) # LIDAR

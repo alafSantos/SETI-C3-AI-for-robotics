@@ -1,59 +1,74 @@
-# Define variables x1 and x2 with values 0 and/or 1.
-x1 = [0, 0, 1, 1]
-x2 = [0, 1, 0, 1]
+'''
+Developed by Alaf DO NASCIMENTO SANTOS in the context of the Artificial Intelligence for Robotics course. Master SETI.
 
-# Function to calculate s
-def get_s(x1, x2, w0, w1, w2):
-    s = w0 + w1*x1 + w2*x2
-    return s
+tp5 controller (main file)
+'''
+# Importing the needed libraries
+from controller import *
 
-# Function to calculate y
-def get_y(s):
-    y = 1
-    if s < 0:
-        y = 0
-    return y
+from graph_walls import graphWalls
+from motors_controller import keyboard_control, forward, backward, turn_left, turn_right, stop
+from perceptron import get_y, get_s
+from flags_file import flags
 
-# Function to test OR gate and find weights
-def test_gate(x1, x2, w0, w1, w2):
-    for i in range(len(x1)):
-        s = get_s(x1[i], x2[i], w0, w1, w2)  # Using unknown weights w0, w1, w2
+# I need to remember to map the sensors output to 0s and 1s
+w0_and = -1.0
+w1_and = 0.1
+w2_and = 0.9
+
+w0_or = -1.0
+w1_or = 1.0
+w2_or = 1.0
+
+if flags["graphics"]:
+    graph = graphWalls()
+
+robot = Supervisor()
+keyboard = Keyboard()
+
+timestep = int(robot.getBasicTimeStep())
+keyboard.enable(timestep)
+
+motor_left = robot.getDevice("motor.left")
+motor_right = robot.getDevice("motor.right")
+motor_left.setPosition(float('inf'))
+motor_right.setPosition(float('inf'))
+motor_left.setVelocity(0)
+motor_right.setVelocity(0)
+node = robot.getFromDef("Thymio")
+
+plot = 0
+speed = 9.53
+
+lidar = robot.getDevice('lidar')
+lidar.enable(timestep)
+lidar.enablePointCloud()
+
+while (robot.step(timestep) != -1): #Appel d'une etape de simulation
+    plot += 1
+
+    # Here I have to read the distance sensors
+    x1 = 1
+    x2 = 0
+
+    if plot % 50 == 0:
+        plot = 0
+        if flags["debug"]:
+            print("\n------------------------------------------------------------------------------")
+            # print("Lidar: ", xy_lidar_list)
+
+        # if flags["graphics"]:
+        #     if flags["reactive"]:
+        #         graph.simple_plot([point[0] for point in xy_lidar_list[-1]], [point[1] for point in xy_lidar_list[-1]]) # LIDAR
+        #     else:    
+        #         graph.simple_plot([point[0] for point in xy_lidar_list], [point[1] for point in xy_lidar_list]) # LIDAR
+
+    if flags["keyboard"]:
+        keyboard_control(keyboard, Keyboard, motor_left, motor_right, speed)
+    else:
+        s = get_s(x1, x2, w0_and, w1_and, w2_and)
         y = get_y(s)
-        print("x1 =", x1[i], ", x2 =", x2[i], ", s =", s, ", y =", y)
 
-def find_weights(gate):
-    # Iterate through each x value one at a time to find weights
-    for w0 in [i * 0.1 for i in range(-10, 11)]: # from -1 up to 1, step = 0.1
-        for w1 in [i * 0.1 for i in range(-10, 11)]:
-            for w2 in [i * 0.1 for i in range(-10, 11)]:
-                all_correct = True
-                for i in range(len(x1)):
-                    s = get_s(x1[i], x2[i], w0, w1, w2)
-                    y = get_y(s)
-                    if gate == "OR":
-                        if not (y == (x1[i] or x2[i])):  # Check if output matches OR gate truth table
-                            all_correct = False
-                            break
-                    if gate == "AND":
-                        if not (y == (x1[i] and x2[i])):  # Check if output matches AND gate truth table
-                            all_correct = False
-                            break
-                    elif gate == "XOR":
-                        if not (y == (x1[i] ^ x2[i])):  # Check if output matches XOR gate truth table
-                            all_correct = False
-                            break
-                if all_correct:
-                    print("Found weights for", gate, "gate:", "w0 =", w0, ", w1 =", w1, ", w2 =", w2)
-                    test_gate(x1, x2, w0, w1, w2)
-                    break
-            if all_correct:
-                break
-        if all_correct:
-            break
-
-print("-------------------------------------------------------------------")
-find_weights("OR")
-print("-------------------------------------------------------------------")
-find_weights("AND")
-print("-------------------------------------------------------------------")
-find_weights("XOR")
+        if y == 1:
+            forward(motor_left, motor_right, speed)
+keyboard.disable()

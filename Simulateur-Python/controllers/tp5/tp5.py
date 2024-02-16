@@ -1,5 +1,5 @@
 '''
-Developed by Alaf DO NASCIMENTO SANTOS in the context of the Artificial Intelligence for Robotics course. Master SETI.
+Developed by Alaf D. N. SANTOS and Simon BERTHOMIEUX in the context of the Artificial Intelligence for Robotics course. Master SETI.
 
 tp5 controller (main file)
 '''
@@ -7,27 +7,30 @@ tp5 controller (main file)
 from controller import *
 
 from graph_walls import graphWalls
-from motors_controller import keyboard_control, forward, backward, turn_left, turn_right, stop
-from perceptron import get_y, get_s
+from motors_controller import forward, stop
+from perceptron import get_y, get_s, f_analogique
 from flags_file import flags
 
-# I need to remember to map the sensors output to 0s and 1s
-w0_and = -1.0
-w1_and = 0.1
-w2_and = 0.9
+w_and = [-1.5, 1.0, 1.0]
+w_or = [-0.5, 1.0, 1.0]
+w_detec=[0.0,1.0,1.0]
 
-w0_or = -1.0
-w1_or = 1.0
-w2_or = 1.0
+
+w_back = 1.0
+w_pos = 0.75
+w_neg = 0.75
+w_fwd = 0.50
+
+W_l = [w_fwd,w_pos,-w_back,-w_neg]
+W_r = [w_fwd,-w_neg,-w_back,w_pos]
+
 
 if flags["graphics"]:
     graph = graphWalls()
 
 robot = Supervisor()
-keyboard = Keyboard()
 
 timestep = int(robot.getBasicTimeStep())
-keyboard.enable(timestep)
 
 motor_left = robot.getDevice("motor.left")
 motor_right = robot.getDevice("motor.right")
@@ -37,38 +40,55 @@ motor_left.setVelocity(0)
 motor_right.setVelocity(0)
 node = robot.getFromDef("Thymio")
 
-plot = 0
-speed = 9.53
+s_lf = robot.getDevice('prox.horizontal.0')
+s_cf = robot.getDevice('prox.horizontal.2')
+s_rf = robot.getDevice('prox.horizontal.4')
 
-lidar = robot.getDevice('lidar')
-lidar.enable(timestep)
-lidar.enablePointCloud()
+s_lb = robot.getDevice('prox.horizontal.5')
+s_rb = robot.getDevice('prox.horizontal.6')
+
+s_lf.enable(timestep)
+s_cf.enable(timestep)
+s_rf.enable(timestep)
+s_lb.enable(timestep)
+s_rb.enable(timestep)
+
+plot = 0
+speed_max = 9.53 # max
+distance_max = 4095
 
 while (robot.step(timestep) != -1): #Appel d'une etape de simulation
     plot += 1
 
-    # Here I have to read the distance sensors
-    x1 = 1
-    x2 = 0
+    x_b1 = s_lb.getValue()/distance_max
+    x_b2 = s_rb.getValue()/distance_max
+    X_b =[1, x_b1, x_b2]
 
-    if plot % 50 == 0:
-        plot = 0
-        if flags["debug"]:
-            print("\n------------------------------------------------------------------------------")
-            # print("Lidar: ", xy_lidar_list)
+    x_lf = s_lf.getValue()/distance_max
+    x_cf = s_cf.getValue()/distance_max
+    x_rf = s_rf.getValue()/distance_max
+    X_f = [1, x_lf, x_cf, x_rf]
 
-        # if flags["graphics"]:
-        #     if flags["reactive"]:
-        #         graph.simple_plot([point[0] for point in xy_lidar_list[-1]], [point[1] for point in xy_lidar_list[-1]]) # LIDAR
-        #     else:    
-        #         graph.simple_plot([point[0] for point in xy_lidar_list], [point[1] for point in xy_lidar_list]) # LIDAR
-
-    if flags["keyboard"]:
-        keyboard_control(keyboard, Keyboard, motor_left, motor_right, speed)
-    else:
-        s = get_s(x1, x2, w0_and, w1_and, w2_and)
+    if flags["exercice_2"]:
+        s = get_s(X_b, w_detec)
         y = get_y(s)
+        print("s, y = ", s, y)
 
         if y == 1:
-            forward(motor_left, motor_right, speed)
-keyboard.disable()
+            forward(motor_left, motor_right, 4)
+        else:
+            stop(motor_left, motor_right)
+
+    if flags["exercice_3_1"]:
+        s = get_s([x_cf], [-1])
+        y = f_analogique(s)
+        forward(motor_left, motor_right, y*speed_max)
+
+    if flags["exercice_3_2"]:
+        s_l = get_s(X_f, W_l)
+        y_l = f_analogique(s_l)
+        s_r = get_s(X_f, W_r)
+        y_r = f_analogique(s_r)
+
+        motor_left.setVelocity(y_l*speed_max)
+        motor_right.setVelocity(y_r*speed_max)

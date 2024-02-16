@@ -3,5 +3,8 @@ flags = {
     "graphics": False,
     "keyboard": False,
     "bubble": False,
-    "reactive": True
+    "reactive": True,
+    "exercice_2": False,
+    "exercice_3_1": False,
+    "exercice_3_2": True
 }

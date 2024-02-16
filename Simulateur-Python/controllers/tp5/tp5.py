@@ -6,7 +6,6 @@ tp5 controller (main file)
 # Importing the needed libraries
 from controller import *
 
-from graph_walls import graphWalls
 from motors_controller import forward, stop
 from perceptron import get_y, get_s, f_analogique
 from flags_file import flags
@@ -15,18 +14,20 @@ w_and = [-1.5, 1.0, 1.0]
 w_or = [-0.5, 1.0, 1.0]
 w_detec=[0.0,1.0,1.0]
 
+# Partie 1
+# w_back = 1.0
+# w_pos = 0.75
+# w_neg = 0.75
+# w_fwd = 0.50
 
-w_back = 1.0
-w_pos = 0.75
-w_neg = 0.75
-w_fwd = 0.50
+# Partie 2 - Suivie
+w_back = 0.75
+w_pos = -0.25
+w_neg = -0.25
+w_fwd = 0.75
 
 W_l = [w_fwd,w_pos,-w_back,-w_neg]
 W_r = [w_fwd,-w_neg,-w_back,w_pos]
-
-
-if flags["graphics"]:
-    graph = graphWalls()
 
 robot = Supervisor()
 

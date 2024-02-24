@@ -14,19 +14,22 @@ w_and = [-1.5, 1.0, 1.0]
 w_or = [-0.5, 1.0, 1.0]
 
 # Partie 1
-w_back = 1.0
-w_pos = 0.75
-w_neg = 0.75
-w_fwd = 0.50
+if flags["exercice_3_1"]:
+    w_fwd = 0.7
+    w_back = 0.9
+    w_pos = 1.0
+    w_neg = 1.0
 
 # Partie 2 - Suivie
-# w_back = 0.75
-# w_pos = -0.25
-# w_neg = -0.25
-# w_fwd = 0.75
+elif flags["exercice_3_2"]:
+    w_fwd = 0.75
+    w_back = 0.75
+    w_pos = -0.25
+    w_neg = -0.25
 
-W_l = [w_fwd,w_pos,-w_back,-w_neg]
-W_r = [w_fwd,-w_neg,-w_back,w_pos]
+if flags["exercice_3_1"] or flags["exercice_3_2"]:
+    W_l = [w_fwd,w_pos,-w_back,-w_neg]
+    W_r = [w_fwd,-w_neg,-w_back,w_pos]
 
 robot = Supervisor()
 keyboard = Keyboard()
@@ -96,7 +99,7 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
             y = f_analogique(s)
             backward(motor_left, motor_right, y*speed_max)
 
-        elif flags["exercice_3_2"]:
+        elif flags["exercice_3_1"] or flags["exercice_3_2"]:
             s_l = get_s(X_f, W_l)
             y_l = f_analogique(s_l)
             s_r = get_s(X_f, W_r)

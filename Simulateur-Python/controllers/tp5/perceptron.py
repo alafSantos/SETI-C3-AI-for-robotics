@@ -92,6 +92,7 @@ if flags["debug"]:
     print("-------------------------------------------------------------------")
     find_weights("XOR") # https://humphryscomputing.com/Notes/Neural/single.neural.html
 
+if flags["graphics"]:
     print("-------------------------------------------------------------------")
     plot_input_plan_weight(x1, x2, 0.5) # OR
     test_gate(x1, x2, [0.0, 1.0, 1.0])

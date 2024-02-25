@@ -95,9 +95,9 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
             backward(motor_left, motor_right, y*speed_max)
 
         elif flags["exercice_3_0_2"]:
-            s = get_s([x_cf], [1])
+            s = get_s([x_lf, x_rf], [0.5, 1])
             y = f_analogique(s)
-            backward(motor_left, motor_right, y*speed_max)
+            forward(motor_left, motor_right, y*speed_max)
 
         elif flags["exercice_3_1"] or flags["exercice_3_2"]:
             s_l = get_s(X_f, W_l)

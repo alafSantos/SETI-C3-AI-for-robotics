@@ -22,10 +22,10 @@ if flags["exercice_3_1"]:
 
 # Partie 2 - Suivie
 elif flags["exercice_3_2"]:
-    w_fwd = 0.75
-    w_back = 0.75
-    w_pos = -0.25
-    w_neg = -0.25
+    w_fwd = 1.0
+    w_back = 1.0
+    w_pos = -0.5
+    w_neg = -0.5
 
 if flags["exercice_3_1"] or flags["exercice_3_2"]:
     W_l = [w_fwd,w_pos,-w_back,-w_neg]

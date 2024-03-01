@@ -1,5 +1,5 @@
 '''
-Developed by Alaf D. N. SANTOS and Simon BERTHOMIEUX in the context of the Artificial Intelligence for Robotics course. Master SETI.
+Developed by Alaf D. N. SANTOS and Simon BERTHOUMIEUX in the context of the Artificial Intelligence for Robotics course. Master SETI.
 
 tp5 controller (main file)
 '''

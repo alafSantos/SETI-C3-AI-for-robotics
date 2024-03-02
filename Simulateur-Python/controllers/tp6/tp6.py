@@ -13,9 +13,6 @@ from perceptron import get_y, get_s, f_analogique
 import numpy as np
 
 if flags["exercice_4"]:
-    '''
-    Using the given architecture (from the assignment)
-    '''
     w11 = 1.0
     w12 = 1.0
     w21 = 1.0
@@ -76,7 +73,6 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
         X_f = [1, x_lf, x_cf, x_rf]
 
         if flags["exercice_4"]:
-            print("starting")
             s1 = f_activation_sat(np.matrix(x_lf).T, np.matrix(w11))
             s2 = f_activation_sat(np.matrix(x_rf).T, np.matrix(w12))
 
@@ -86,7 +82,6 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
             y1 = f_activation_sat(np.matrix([s1,s2]).T, np.matrix(w1).T)
             y2 = f_activation_sat(np.matrix([s1,s2]).T, np.matrix(w2).T)
 
-            print("sorties: ", y1, y2)
             motor_left.setVelocity(y1[0]*speed_max)
             motor_right.setVelocity(y2[0]*speed_max)
 

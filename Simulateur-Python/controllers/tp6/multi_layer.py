@@ -61,5 +61,7 @@ if flags["exercice_3"]:
 
     y3 = f_activation_sat(np.matrix([y1,y2]).T, np.matrix(w3).T)
 
+    plot_y(x1, y1, "x1", "y1", "y1 en fonction de x1 pour le réseau multicouche")
+    plot_y(x1, y2, "x1", "y2", "y2 en fonction de x1 pour le réseau multicouche")
     plot_y(x1, y3, "x1", "y3", "y3 en fonction de x1 pour le réseau multicouche")
 

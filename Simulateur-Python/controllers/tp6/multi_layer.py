@@ -2,6 +2,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 from flags_file import flags
 
+def f_activation_sat_q5(x, w):
+    s_vec = np.dot(x,w)
+    y_vec = []
+    for s in s_vec:
+        if s < 0:
+            y = 0
+        elif s > 1:
+            y = 1
+        else:
+            y = float(s[0])
+        y_vec.append(y)
+
+    return y_vec
+
 def f_activation_sat(x, w):
     s_vec = np.dot(x,w)
     y_vec = []
@@ -64,4 +78,9 @@ if flags["exercice_3"]:
     plot_y(x1, y1, "x1", "y1", "y1 en fonction de x1 pour le réseau multicouche")
     plot_y(x1, y2, "x1", "y2", "y2 en fonction de x1 pour le réseau multicouche")
     plot_y(x1, y3, "x1", "y3", "y3 en fonction de x1 pour le réseau multicouche")
+
+if flags["exercice_5"]:
+    print("faire apres")
+
+    f_activation_sat_q5
 

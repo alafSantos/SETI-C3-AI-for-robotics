@@ -84,9 +84,6 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
 
             motor_left.setVelocity(y1[0]*speed_max)
             motor_right.setVelocity(y2[0]*speed_max)
-
-        elif flags["exercice_5"]:
-            print("faire apres")
         
         elif flags["exercice_6"]:
             s_l = get_s(X_f, W_l)

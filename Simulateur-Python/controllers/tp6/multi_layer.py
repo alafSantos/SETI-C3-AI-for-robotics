@@ -80,7 +80,22 @@ if flags["exercice_3"]:
     plot_y(x1, y3, "x1", "y3", "y3 en fonction de x1 pour le réseau multicouche")
 
 if flags["exercice_5"]:
-    print("faire apres")
+    step = .1
+    w_rec_v = np.arange(0, 2.0 + step, step)
+    nmbr_step=10
+    
+    w1=0.5
+    for w_rec in w_rec_v:
+        x_rec=0
+        y_v=[]
+        for i in range(nmbr_step):
+            x1=(i==0)
+            y = f_activation_sat_q5(np.matrix([x1,x_rec]), np.matrix([w1,w_rec]).T)
+            x_rec=y[0]
+            y_v.append(y)
 
-    f_activation_sat_q5
+        plt.plot(range(nmbr_step), y_v, label=f'w_rec = {w_rec}')
+
+    titre = 'Evolution de y1 selon t le passage des échantillons, pour différentes valeurs de w_rec'
+    plot_y(w_rec, y_v, 't', 'y_1', titre, False)
 

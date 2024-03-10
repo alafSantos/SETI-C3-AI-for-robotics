@@ -20,14 +20,28 @@ if flags["exercice_4"]:
     w23 = -2.0
     w24 = 1.0
 
+elif flags["exercice_6_ref"]:
+    w_fwd = 0.7
+    w_back = 0.9
+    w_pos = 1.0
+    w_neg = 1.0
+    
+
+    W_l = [w_fwd,w_pos,-w_back,-w_neg]
+    W_r = [w_fwd,-w_neg,-w_back,w_pos]
+
 elif flags["exercice_6"]:
     w_fwd = 0.7
     w_back = 0.9
     w_pos = 1.0
     w_neg = 1.0
+    w_rec = 0.5
 
-    W_l = [w_fwd,w_pos,-w_back,-w_neg]
-    W_r = [w_fwd,-w_neg,-w_back,w_pos]
+    x_rec_l=0.0
+    x_rec_r=0.0
+
+    W_l = [w_fwd,w_pos,-w_back,-w_neg,w_rec]
+    W_r = [w_fwd,-w_neg,-w_back,w_pos,w_rec]
     
 
 robot = Supervisor()
@@ -84,14 +98,26 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
 
             motor_left.setVelocity(y1[0]*speed_max)
             motor_right.setVelocity(y2[0]*speed_max)
+
+
+        elif flags["exercice_6_ref"]:
+            y_l = f_activation_sat(np.matrix(X_f).T, np.matrix(W_l).T)
+            y_r = f_activation_sat(np.matrix(X_f).T, np.matrix(W_r).T)
+
+
+            motor_left.setVelocity(y_l[0]*speed_max)
+            motor_right.setVelocity(y_r[0]*speed_max)
         
         elif flags["exercice_6"]:
-            s_l = get_s(X_f, W_l)
-            y_l = f_analogique(s_l)
-            s_r = get_s(X_f, W_r)
-            y_r = f_analogique(s_r)
+            X_f_l = [1, x_lf, x_cf, x_rf,x_rec_l]
+            X_f_r = [1, x_lf, x_cf, x_rf,x_rec_r]
+            y_l = f_activation_sat(np.matrix(X_f_l).T, np.matrix(W_l).T)
+            y_r = f_activation_sat(np.matrix(X_f_r).T, np.matrix(W_r).T)
 
-            motor_left.setVelocity(y_l*speed_max)
-            motor_right.setVelocity(y_r*speed_max)
+            x_rec_l=y_l[0]
+            x_rec_r=y_r[0]
+
+            motor_left.setVelocity(y_l[0]*speed_max)
+            motor_right.setVelocity(y_r[0]*speed_max)
 
         

@@ -1,6 +1,6 @@
 flags = {
     "debug": True,
-    "graphics": True,
+    "graphics": False,
     "keyboard": False,
     "exercice_1": False,
     "exercice_2": False,
@@ -8,7 +8,7 @@ flags = {
     "exercice_4": False,
     "exercice_5": False,
     "exercice_6_ref": False,
-    "exercice_6": True,
+    "exercice_6": False,
     "exercice_7": False,
-    "exercice_8": False,
+    "exercice_8": True,
 }

@@ -8,7 +8,7 @@ flags = {
     "exercice_4": False,
     "exercice_5": False,
     "exercice_6_ref": False,
-    "exercice_6": False,
+    "exercice_6": True,
     "exercice_7": False,
-    "exercice_8": True,
+    "exercice_8": False,
 }

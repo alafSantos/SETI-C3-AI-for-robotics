@@ -35,7 +35,7 @@ elif flags["exercice_6"]:
     w_back = 0.9
     w_pos = 1.0
     w_neg = 1.0
-    w_rec = 0.5
+    w_rec = 0.1
 
     x_rec_l=0.0
     x_rec_r=0.0
@@ -107,9 +107,8 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
 
 
         elif flags["exercice_6_ref"]:
-            y_l = f_activation_sat(np.matrix(X_f).T, np.matrix(W_l).T)
-            y_r = f_activation_sat(np.matrix(X_f).T, np.matrix(W_r).T)
-
+            y_l = f_activation_sat(np.matrix(X_f), np.matrix(W_l).T)
+            y_r = f_activation_sat(np.matrix(X_f), np.matrix(W_r).T)
 
             motor_left.setVelocity(y_l[0]*speed_max)
             motor_right.setVelocity(y_r[0]*speed_max)

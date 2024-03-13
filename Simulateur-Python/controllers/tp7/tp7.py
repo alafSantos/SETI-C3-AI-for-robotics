@@ -8,9 +8,31 @@ from controller import *
 
 from motors_controller import forward, backward, stop, keyboard_control
 from flags_file import flags
-from perceptron import operateurXOR
 import numpy as np
+import h5py
+
+if flags["exercice_8"]:
+    w_fwd = 0.7
+    w_back = 0.9
+    w_pos = 1.0
+    w_neg = 1.0
     
+    W_l = [w_fwd,w_pos,-w_back,-w_neg]
+    W_r = [w_fwd,-w_neg,-w_back,w_pos]
+
+    def f_activation_sat(x, w):
+        s_vec = np.dot(x,w)
+        y_vec = []
+        for s in s_vec:
+            if s < -1:
+                y = -1
+            elif s > 1:
+                y = 1
+            else:
+                y = float(s[0])
+            y_vec.append(y)
+
+        return y_vec
 
 robot = Supervisor()
 keyboard = Keyboard()
@@ -27,15 +49,20 @@ motor_right.setVelocity(0)
 node = robot.getFromDef("Thymio")
 
 sensor_left_front = robot.getDevice('prox.horizontal.0')
+sensor_left2_front = robot.getDevice('prox.horizontal.1')
 sensor_center_front = robot.getDevice('prox.horizontal.2')
+sensor_right2_front = robot.getDevice('prox.horizontal.3')
 sensor_right_front = robot.getDevice('prox.horizontal.4')
 
 sensor_left_back = robot.getDevice('prox.horizontal.5')
 sensor_right_back = robot.getDevice('prox.horizontal.6')
 
 sensor_left_front.enable(timestep)
+sensor_left2_front.enable(timestep)
 sensor_center_front.enable(timestep)
 sensor_right_front.enable(timestep)
+sensor_right2_front.enable(timestep)
+
 sensor_left_back.enable(timestep)
 sensor_right_back.enable(timestep)
 
@@ -43,17 +70,55 @@ plot = 0
 speed_max = 9.53 # max
 distance_max = 4095
 
+proximeters_list = []
+speed_list = []
+
 while (robot.step(timestep) != -1): #Appel d'une etape de simulation
     plot += 1
+
+    if flags["exercice_8"]:
+        key=keyboard.getKey()
 
     if flags["keyboard"]:
         keyboard_control(keyboard, Keyboard, motor_left, motor_right, speed_max)
     else:
         x_lf = sensor_left_front.getValue()/distance_max
+        x_l2f = sensor_left2_front.getValue()/distance_max
         x_cf = sensor_center_front.getValue()/distance_max
         x_rf = sensor_right_front.getValue()/distance_max
+        x_r2f = sensor_right2_front.getValue()/distance_max
+
+        x_lb = sensor_left_back.getValue()/distance_max
+        x_rb = sensor_right_back.getValue()/distance_max
+
         X_f = [1, x_lf, x_cf, x_rf]
 
         if flags["exercice_8"]:
-            print("starting")
-        
+
+            y_l = f_activation_sat(np.matrix(X_f), np.matrix(W_l).T)
+            y_r = f_activation_sat(np.matrix(X_f), np.matrix(W_r).T)
+
+            sl = y_l[0]*speed_max
+            sr = y_r[0]*speed_max
+
+            motor_left.setVelocity(sl)
+            motor_right.setVelocity(sr)
+
+            speed_list.append([sl, sr])
+            proximeters_list.append([x_lf, x_l2f, x_cf, x_rf, x_r2f, x_lb, x_rb])
+
+            if (key==Keyboard.CONTROL):
+                print("hey")
+                # Open an HDF5 file for writing
+                with h5py.File("dataset_webots.hdf5", "w") as f:
+                    speed_array = np.array(speed_list)
+                    proximeters_array = np.array(proximeters_list)
+
+                    # Create the main dataset (can be empty or contain additional data)
+                    speed_dataset = f.create_dataset('thymio_speed', data=speed_array)
+                    proximeters_dataset = f.create_dataset('thymio_prox', data=proximeters_array)
+
+                    # Close the HDF5 file
+                    speed_list = []
+                    proximeters_list = []
+                    f.close()

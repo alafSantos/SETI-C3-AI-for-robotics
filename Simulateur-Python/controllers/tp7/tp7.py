@@ -66,7 +66,6 @@ sensor_right2_front.enable(timestep)
 sensor_left_back.enable(timestep)
 sensor_right_back.enable(timestep)
 
-plot = 0
 speed_max = 9.53 # max
 distance_max = 4095
 
@@ -76,7 +75,6 @@ speed_list = []
 saved = False
 
 while (robot.step(timestep) != -1): #Appel d'une etape de simulation
-    plot += 1
 
     if flags["keyboard"]:
         keyboard_control(keyboard, Keyboard, motor_left, motor_right, speed_max)

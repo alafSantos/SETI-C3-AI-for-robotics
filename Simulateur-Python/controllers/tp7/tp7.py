@@ -73,6 +73,8 @@ distance_max = 4095
 proximeters_list = []
 speed_list = []
 
+saved = False
+
 while (robot.step(timestep) != -1): #Appel d'une etape de simulation
     plot += 1
 
@@ -106,11 +108,10 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
             speed_list.append([sl, sr])
             proximeters_list.append([x_lf, x_l2f, x_cf, x_rf, x_r2f, x_lb, x_rb])
             
-            if (key==Keyboard.CONTROL):
-            # if plot == 1000:
-                print("hey")
+            if (key==Keyboard.DOWN) and not saved:
+                print("Saving dataset...")
                 # Open an HDF5 file for writing
-                with h5py.File("dataset_webots.hdf5", "w") as f:
+                with h5py.File("datasets/dataset_webots.hdf5", "w") as f:
                     speed_array = np.array(speed_list)
                     proximeters_array = np.array(proximeters_list)
 
@@ -121,4 +122,5 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
                     # Close the HDF5 file
                     speed_list = []
                     proximeters_list = []
+                    saved = True
                     f.close()

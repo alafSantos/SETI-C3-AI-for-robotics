@@ -76,12 +76,11 @@ speed_list = []
 while (robot.step(timestep) != -1): #Appel d'une etape de simulation
     plot += 1
 
-    if flags["exercice_8"]:
-        key=keyboard.getKey()
-
     if flags["keyboard"]:
         keyboard_control(keyboard, Keyboard, motor_left, motor_right, speed_max)
     else:
+        key=keyboard.getKey()
+
         x_lf = sensor_left_front.getValue()/distance_max
         x_l2f = sensor_left2_front.getValue()/distance_max
         x_cf = sensor_center_front.getValue()/distance_max
@@ -106,8 +105,9 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
 
             speed_list.append([sl, sr])
             proximeters_list.append([x_lf, x_l2f, x_cf, x_rf, x_r2f, x_lb, x_rb])
-
+            
             if (key==Keyboard.CONTROL):
+            # if plot == 1000:
                 print("hey")
                 # Open an HDF5 file for writing
                 with h5py.File("dataset_webots.hdf5", "w") as f:

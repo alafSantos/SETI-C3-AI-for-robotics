@@ -10,6 +10,7 @@ from motors_controller import forward, backward, stop, keyboard_control
 from flags_file import flags
 import numpy as np
 import h5py
+import pickle
 
 if flags["exercice_8"]:
     w_fwd = 0.7
@@ -33,6 +34,11 @@ if flags["exercice_8"]:
             y_vec.append(y)
 
         return y_vec
+
+# Récupération du model
+if flags["exercice_10"]:
+    with open('ai_controller_model_hyper_prox.model', 'rb') as f:
+        controller = pickle.load(f)
 
 robot = Supervisor()
 keyboard = Keyboard()
@@ -122,3 +128,8 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
                     proximeters_list = []
                     saved = True
                     f.close()
+
+        if flags["exercice_10"]:
+            sl, sr=controller.predict([x_lf, x_l2f, x_cf, x_rf, x_r2f, x_lb, x_rb])
+            motor_left.setVelocity(sl)
+            motor_right.setVelocity(sr)

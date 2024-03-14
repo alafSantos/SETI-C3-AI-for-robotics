@@ -130,6 +130,7 @@ while (robot.step(timestep) != -1): #Appel d'une etape de simulation
                     f.close()
 
         if flags["exercice_10"]:
-            sl, sr=controller.predict([x_lf, x_l2f, x_cf, x_rf, x_r2f, x_lb, x_rb])
-            motor_left.setVelocity(sl)
-            motor_right.setVelocity(sr)
+            s=controller.predict([[x_lf, x_l2f, x_cf, x_rf, x_r2f, x_lb, x_rb]])
+            s=np.clip(s, -1, 1)
+            motor_left.setVelocity(s[0][0]*speed_max)
+            motor_right.setVelocity(s[0][1]*speed_max)

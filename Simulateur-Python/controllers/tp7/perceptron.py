@@ -94,6 +94,7 @@ elif flags["exercice_9"]:
 
     # Split du dataset
     prox_x_train, prox_x_test, prox_y_train, prox_y_test = train_test_split(thymio_proximeters, thymio_commands)
+    print(np.shape(prox_x_train))
 
     # Définition du réseau et entrainement
     controller = MLPRegressor(hidden_layer_sizes=(2,2), activation="tanh", solver="lbfgs")
@@ -103,7 +104,8 @@ elif flags["exercice_9"]:
     print("W0: ", controller.intercepts_)
     print("Weights: ", controller.coefs_)
     print("Score: ", controller.score(prox_x_test, prox_y_test))
-
+    print("Predictions: ", controller.predict([[0,0,0,0,0,0,0]]))
+    
     # Pickle the model
     filename = 'ai_controller_model_hyper_prox.model'
     pickle.dump(controller, open(filename, 'wb'))

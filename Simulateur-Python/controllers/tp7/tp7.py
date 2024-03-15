@@ -6,7 +6,7 @@ tp7 controller (main file)
 # Importing the needed libraries
 from controller import *
 
-from motors_controller import forward, backward, stop, keyboard_control
+from motors_controller import keyboard_control
 from flags_file import flags
 import numpy as np
 import h5py
